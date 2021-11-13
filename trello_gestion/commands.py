@@ -14,6 +14,9 @@ parser.add_argument("--confirm", action="store_true", help="Confirm action, requ
 parser.add_argument("-n", "--names", nargs="+", default=[])
 parser.add_argument("-c", "--cards", nargs="+", default=[])
 
+# No change on this action
+parser.add_argument("--list-cards", action="store_true", help="See all the cards in the board")
+
 
 parser_args = parser.parse_args()
 
@@ -49,6 +52,6 @@ def main():
             update_labels=update_labels,
             update_duedate=update_duedate,
             fake=not parser_args.confirm,
-            specific_card_names=map(lambda x: x.lower(), parser_args.cards),
+            specific_card_names=list(map(lambda x: x.lower(), parser_args.cards)),
             verbose=parser_args.verbose
         )

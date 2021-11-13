@@ -125,8 +125,13 @@ class Board:
 
         print("Searching \"TODO\" label ...")
         for label in tqdm(self.board["labels"]):
+            if kwargs.get("verbose"):
+                print(label)
             if "todo" in label["name"].lower():
                 self.label_todo = label
+
+                if kwargs.get("verbose"):
+                    print("todo in", label)
 
         if not self.label_todo:
             print("No \"TODO\" label found, skipping")
