@@ -6,6 +6,10 @@ It's a package pip, simply install it via `pip install .` when inside the root f
 You must export an os environ variable to the location of the settings file.
 `export TRELLO_GESTION_SETTINGS_FILE="~/Documents/trello-gestion/settings.py"`
 
+
+## Fully restore a board
+`trello-gestion --restore --confirm` with the correct `settings.py` (date, and board id)
+
 ## Commands
 
 ### `-n`, `--names`

@@ -9,7 +9,9 @@ _SETTINGS_DEFAULT_LOCATION = os.path.join(os.getcwd(), "settings.py")
 def import_settings():
 
     # Set this environment variable to the settings.py config file location
-    settings_file_location = os.path.abspath(os.environ.get("TRELLO_GESTION_SETTINGS_FILE", _SETTINGS_DEFAULT_LOCATION))
+    settings_file_location = os.path.abspath(
+        os.environ.get("TRELLO_GESTION_SETTINGS_FILE", _SETTINGS_DEFAULT_LOCATION)
+    )
 
     # The settings file must be a python file
     if not settings_file_location.endswith(".py"):

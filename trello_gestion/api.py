@@ -2,27 +2,26 @@ from . import settings
 from .decorators import debug_verbose
 
 
+from datetime import datetime
 import json
 import os
 import re
-import requests
 import urllib.parse
-from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from tqdm import tqdm
+import requests
 
 
 ALLOWED_RESOURCES = [
     "board",
-    "cards", 
-    "checklists", 
-    "labels", 
-    "lists", 
+    "cards",
+    "checklists",
+    "labels",
+    "lists",
 ]
 
 
 class TrelloApi:
-
     @classmethod
     @debug_verbose(False)
     def url(self, resource_type, *args, **kwargs):
@@ -33,46 +32,51 @@ class TrelloApi:
         return "{}/{}?{}".format(
             settings.TRELLO_API_URL.rstrip("/"),
             "{}/{}".format(resource_type, "/".join(args)),
-            urllib.parse.urlencode({
-                "key": settings.TRELLO_API_KEY,
-                "token": settings.TRELLO_TOKEN,
-                **kwargs,
-            })
+            urllib.parse.urlencode(
+                {
+                    "key": settings.TRELLO_API_KEY,
+                    "token": settings.TRELLO_TOKEN,
+                    **kwargs,
+                }
+            ),
         )
 
     @classmethod
-    @debug_verbose(True, lambda x: '')
+    @debug_verbose(True, lambda x: "")
     def get_board(cls, board_id, *args, **kwargs):
 
-        return requests.get(cls.url(
-            "board",
-            board_id,
-            *args,
-            **kwargs,
-            cards="all",
-            labels="all",
-            lists="all",
-            members="all",
-        )).json()
+        return requests.get(
+            cls.url(
+                "board",
+                board_id,
+                *args,
+                **kwargs,
+                cards="all",
+                labels="all",
+                lists="all",
+                members="all",
+            )
+        ).json()
 
     @classmethod
-    @debug_verbose(True, lambda x: '')
+    @debug_verbose(True, lambda x: "")
     def delete(cls, resource_type, resource_id):
         return requests.delete(cls.url(resource_type, resource_id)).json()
 
     @classmethod
-    @debug_verbose(True, lambda x: '')
+    @debug_verbose(True, lambda x: "")
     def update_card(cls, card_id, *args, **kwargs):
-        return requests.put(cls.url('cards', card_id, *args, **kwargs))
+        return requests.put(cls.url("cards", card_id, *args, **kwargs))
 
 
 class Board:
-
     def __init__(self, name, board_settings, *args, **kwargs):
         self.name = name
         self.board_settings = board_settings
         self.board_id = self.board_settings["board_id"]
-        self.start_date = datetime.fromisoformat("{}{}".format(self.board_settings["start_date"], settings.TIMEZONE))
+        self.start_date = datetime.fromisoformat(
+            "{}{}".format(self.board_settings["start_date"], settings.TIMEZONE)
+        )
 
         self.label_todo = None
 
@@ -90,7 +94,7 @@ class Board:
 
             if "heure" in label["name"].lower():
                 delta_type = "hours"
-            
+
             elif "jour" in label["name"].lower():
                 delta_type = "days"
 
@@ -118,12 +122,20 @@ class Board:
 
         return ",".join(label_to_keep), delta_options
 
-    def restore(self, update_labels=False, update_duedate=False, fake=True, specific_card_names=[], *args, **kwargs):
+    def restore(
+        self,
+        update_labels=False,
+        update_duedate=False,
+        fake=True,
+        specific_card_names=[],
+        *args,
+        **kwargs
+    ):
 
         self.board = TrelloApi.get_board(self.board_id, *args, **kwargs)
         print("Restoring Board {} ...".format(self.board["name"]))
 
-        print("Searching \"TODO\" label ...")
+        print('Searching "TODO" label ...')
         for label in tqdm(self.board["labels"]):
             if kwargs.get("verbose"):
                 print(label)
@@ -134,7 +146,7 @@ class Board:
                     print("todo in", label)
 
         if not self.label_todo:
-            print("No \"TODO\" label found, skipping")
+            print('No "TODO" label found, skipping')
 
         print("Updating all the {} cards ...".format(len(self.board["cards"])))
         for card in tqdm(self.board["cards"]):
@@ -153,7 +165,11 @@ class Board:
                 card_options["idLabels"] = card_labels
 
             if update_duedate:
-                card_options["due"] = (self.start_date + relativedelta(**date_options)).isoformat() if date_options else 'null'
+                card_options["due"] = (
+                    (self.start_date + relativedelta(**date_options)).isoformat()
+                    if date_options
+                    else "null"
+                )
 
             if kwargs.get("verbose") or True:
                 print(card["name"])
@@ -166,5 +182,3 @@ class Board:
                     raise Exception
 
         print("Board restored !")
-            
-
